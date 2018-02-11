@@ -3,26 +3,8 @@
 
 Overview
 ---
-In this project, you will use what you've learned about deep neural networks and convolutional neural networks to classify traffic signs. You will train and validate a model so it can classify traffic sign images using the [German Traffic Sign Dataset](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset). After the model is trained, you will then try out your model on images of German traffic signs that you find on the web.
-
-We have included an Ipython notebook that contains further instructions 
-and starter code. Be sure to download the [Ipython notebook](https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project/blob/master/Traffic_Sign_Classifier.ipynb). 
-
-We also want you to create a detailed writeup of the project. Check out the [writeup template](https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup. The writeup can be either a markdown file or a pdf document.
-
-To meet specifications, the project will require submitting three files: 
-* the Ipython notebook with the code
-* the code exported as an html file
-* a writeup report either as a markdown or pdf file 
-
-Creating a Great Writeup
----
-A great writeup should include the [rubric points](https://review.udacity.com/#!/rubrics/481/view) as well as your description of how you addressed each point.  You should include a detailed description of the code used in each step (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
-
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup.
-
+Solution of Project 2 of Udacity's Self Driving Car Nanodegree.
+ 
 The Project
 ---
 The goals / steps of this project are the following:
@@ -33,26 +15,87 @@ The goals / steps of this project are the following:
 * Analyze the softmax probabilities of the new images
 * Summarize the results with a written report
 
-### Dependencies
-This lab requires:
 
-* [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit)
+### Notebook
 
-The lab environment can be created with CarND Term1 Starter Kit. Click [here](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) for the details.
+* Source Code: [Traffic_Sign_Classifier.ipynb](./Traffic_Sign_Classifier.ipynb)
 
-### Dataset and Repository
 
-1. Download the data set. The classroom has a link to the data set in the "Project Instructions" content. This is a pickled dataset in which we've already resized the images to 32x32. It contains a training, validation and test set.
-2. Clone the project, which contains the Ipython notebook and the writeup template.
-```sh
-git clone https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project
-cd CarND-Traffic-Sign-Classifier-Project
-jupyter notebook Traffic_Sign_Classifier.ipynb
-```
+### Basic summary of the data set
 
-### Requirements for Submission
-Follow the instructions in the `Traffic_Sign_Classifier.ipynb` notebook and write the project report using the writeup template as a guide, `writeup_template.md`. Submit the project code and writeup document.
+* The size of training set is 34799
+* The size of validation set is 4410
+* The size of test set is 12630
+* The shape of a traffic sign image is (32, 32, 3)
+* The number of unique classes/labels in the data set is 43
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+### Design and Test a Model Architecture
+
+#### Preprocessing
+
+The images of the training dataset had 3 color channels. I reduced the channels to only one.
+Formula I had used - np.dot(X_train[...,:3], np.array([0.299, 0.587, 0.114]).reshape(3,1)) 
+
+I normalized the data to have 0 mean by dividing by 255 and subtracting 0.5
+
+#### Model Architecture
+ 
+The input of the CNN is an 32x32x1 image and the output is the probability of each of the 43 possible traffic signs.
+I tried with original LeNet model but Validation accuracy was never going beyond 93%
+I also tried AlexNet architecture but it was very slow to train and accuracy was stuck around 50% 
+
+I used below architecture with Relu activation and AdamOptimizer
+
+ CNN Model Layers :
+* Conv layer : 32x32x1 -> 28x28x48
+* Max Pooling : 28x28x48 -> 14x14x48
+* Conv layer : 14x14x48 -> 10x10x96
+* Max Pooling : 10x10x96 -> 5x5x96
+* Conv layer : 5x5x96 -> 5x5x192
+* Max Pooling : 5x5x192 -> 3x3x192
+* Fully connected Layer : 1728 -> 120
+* Fully connected Layer : 120 -> 84
+* Fully connected Layer : 84 -> 43
+
+
+#### Model Training
+
+Hyper parameters:
+* EPOCHS = 30
+* BATCH_SIZE = 128
+* learning rate = 0.001
+* OPIMIZER: AdamOptimizer
+
+My results after training the model:
+* Training Accuracy = **100%**
+* Validation Accuracy = **96.4%**
+* Test Accuracy = **94.3%**
+
+#### Solution Approach
+
+I tried with LeNet. LeNet validation accuracy was not going beyond 93%.
+I modified model and added more channels and one extra Conv layer and Max Pool layer.
+
+### Test on new images
+
+#### Acquiring New Images
+
+I downloaded images from internet after searching for German Dataset. Using openCV resize function I converted high resolution images to 32x32x3
+
+
+#### Performance on New Images
+
+Performance on new image was 42.9%. One of the reason for this poor performance could be that model over fits.
+Generating more training example or adding L2 regularization/dropout could have improved performance
+
+#### Softmax Probabilities
+
+Out of 7 samples model correctly predicted on 4 images and incorrectly predicted 3
+
+* Wrongly predicted Right Turn Ahead to Roundabout Mandatory
+* Wrongly predicted Beware of ice/snow to Roundabout Mandatory
+* Correctly predicted Road work
+* Correctly predicted Children Crossing
+* Correctly predicted Right of way at the next intersection
+* For Stop it got confused with Yield (58% yield - 41% stop)
 
